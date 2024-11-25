@@ -6,147 +6,213 @@ To design and simulate a 4-bit Ripple Counter using Verilog HDL with a function 
 Apparatus Required:
 Computer with Vivado or any Verilog simulation software.
 Verilog HDL compiler.
-
-// Verilog Code
-module ripple_carry_adder_4bit (
-    input [3:0] A,      // 4-bit input A
-    input [3:0] B,      // 4-bit input B
-    input Cin,          // Carry input
-    output [3:0] Sum,   // 4-bit Sum output
-    output Cout         // Carry output
+module rom_design(clk,rst,address,dataout);
+input clk,rst;
+input[2:0] address;
+output reg[3:0] dataout;
+reg [3:0] rom_design[7:0];
+initial begin
+rom_design[0]=4'd1;
+rom_design[1]=4'd2;
+rom_design[2]=4'd3;
+rom_design[4]=4'd10;
+rom_design[5]=4'd11;
+rom_design[6]=4'd12;
+rom_design[7]=4'd15 ;
+end
+always@(posedge clk) begin
+if(rst)
+dataout=4'd0;
+else
+dataout=rom_design[address];
+end
+endmodule
+module rom_design_tb;
+reg clk,rst;
+red[2:0]address;
+wire[3:0]dataout;
+rom_design dut(
+.clk(clk),
+.rst(rst),
+.address(address),
+.dataout(dataout)
 );
-
-    reg [3:0] sum_temp;
-    reg cout_temp;
-
-    // Task for Full Adder
-    task full_adder;
-        input a, b, cin;
-        output sum, cout;
-        begin
-            sum = a ^ b ^ cin;
-            cout = (a & b) | (b & cin) | (cin & a);
-        end
-    endtask
-
-    // Ripple carry logic using task
-    always @(*) begin
-        full_adder(A[0], B[0], Cin, sum_temp[0], cout_temp);
-        full_adder(A[1], B[1], cout_temp, sum_temp[1], cout_temp);
-        full_adder(A[2], B[2], cout_temp, sum_temp[2], cout_temp);
-        full_adder(A[3], B[3], cout_temp, sum_temp[3], Cout);
-    end
-
-    assign Sum = sum_temp;
-
+initial begin
+clk=1'b0;
+forever #5 clk=~clk;
+end
+intitial begin
+rst=1'b1;
+address=3'b000;
+#10 rst=1'b0;
+#10 address=3'b000;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b001;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b010;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b100;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b101;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b110;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 address=3'b111;
+#10 $display("Address: %d, Dataout: %d, address, dataout);
+#10 rst=1'b1;
+#10 $display("Reset asserted, Dataout: %d, dataout);
+end
 endmodule
-
-
-// Test bench for Ripple carry adder
-
-module ripple_carry_adder_4bit_tb;
-
-    reg [3:0] A, B;
-    reg Cin;
-    wire [3:0] Sum;
-    wire Cout;
-
-    // Instantiate the ripple carry adder
-    ripple_carry_adder_4bit uut (
-        .A(A),
-        .B(B),
-        .Cin(Cin),
-        .Sum(Sum),
-        .Cout(Cout)
-    );
-
-    initial begin
-        // Test cases
-        A = 4'b0001; B = 4'b0010; Cin = 0;
-        #10;
-        
-        A = 4'b0110; B = 4'b0101; Cin = 0;
-        #10;
-        
-        A = 4'b1111; B = 4'b0001; Cin = 0;
-        #10;
-        
-        A = 4'b1010; B = 4'b1101; Cin = 1;
-        #10;
-        
-        A = 4'b1111; B = 4'b1111; Cin = 1;
-        #10;
-
-        $stop;
-    end
-
-    initial begin
-        $monitor("Time = %0t | A = %b | B = %b | Cin = %b | Sum = %b | Cout = %b", $time, A, B, Cin, Sum, Cout);
-    end
-
+module ram(clk,rst,en,data_in,data_out,address);
+input clk,rst,en;
+input[11:0] address;
+input[7:0] data_in;
+output reg[7:0] data_out;
+reg[1023:0] mem[7:0];
+always@(posedge clk)
+begin
+if(rst)
+data_out<=8'd0;
+else if(en)
+mem[address]<=data_in;
+else
+data_out<=mem[address];
+end
 endmodule
-
-
-// Verilog Code ripple counter
-
-module ripple_counter_4bit (
-    input clk,           // Clock signal
-    input reset,         // Reset signal
-    output reg [3:0] Q   // 4-bit output for the counter value
+module rom_design_tb;
+reg clk,rst;
+reg[2:0]address;
+wire[3:0]dataout;
+rom_design dut(
+.clk(clk),
+.rst(rst),
+.address(address),
+.dataout(dataout)
 );
-
-    // Function to calculate next state
-    function [3:0] next_state;
-        input [3:0] curr_state;
-        begin
-            next_state = curr_state + 1;
-        end
-    endfunction
-
-    // Sequential logic for counter
-    always @(posedge clk or posedge reset) begin
-        if (reset)
-            Q <= 4'b0000;       // Reset the counter to 0
-        else
-            Q <= next_state(Q); // Increment the counter
-    end
-
+initial begin
+rst=1'b1;
+address=3'b000;
+#10 rst=1'b0;
+#10 address=3'b000;
+Output:
+FIRST IN FIRST OUT[FIFO]:
+To design and simulate a FIFO memory using Verilog HDL and verify the functionality
+through a testbench in the Vivado 2023.1 simulation environment.
+Apparatus RequiredVivado 2023.1 or equivalent Verilog simulation tool. Computer
+system with a suitable operating system.
+ProcedureLaunch Vivado 2023.1:
+Open Vivado and create a new project. Design the Verilog Code for FIFO:
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b001;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b010;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b100;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b101;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b110;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 address=3'b111;
+#10 $display("Address: %d, Dataout:%d, address, dataout);
+#10 arst=1'b1;
+#10 $display("Reset assertion, Dataout:%d,dataout);
+end
 endmodule
-
-// TestBench
-
-module ripple_counter_4bit_tb;
-
-    reg clk;
-    reg reset;
-    wire [3:0] Q;
-
-    // Instantiate the ripple counter
-    ripple_counter_4bit uut (
-        .clk(clk),
-        .reset(reset),
-        .Q(Q)
-    );
-
-    // Clock generation (10ns period)
-    always #5 clk = ~clk;
-
-    initial begin
-        // Initialize inputs
-        clk = 0;
-        reset = 1;
-
-        // Hold reset for 20ns
-        #20 reset = 0;
-
-        // Run simulation for 200ns
-        #200 $stop;
-    end
-
-    initial begin
-        $monitor("Time = %0t | Reset = %b | Q = %b", $time, reset, Q);
-    end
-
+module fifo_8 #(parameter depth=8, data_width=8)
+(input clk,rst,
+input w_en,r_en,
+input [data_width-1:0] data_in,
+output reg[data_width-1:0] data_out,
+output full, empty);
+reg[$clog2(depth)-1:0] w_ptr, r_pt;
+reg[data_width-1:0] fifo [depth-1:0];
+always@(posedge clk) begin
+if(lrst) begin
+w_ptr<=0;
+r_ptr<=0;
+data_out<=0;
+end
+end
+always@(posedge clk) begin
+if(w_en && !full) begin
+fifo[w_ptr]<=data_in;
+w_ptr<=(w_ptr+1) % depth;
+end
+end
+always@(posedge clk) begin
+if(r_en && !empty) begin
+ data_out<=fifo[r_ptr];
+ r_ptr<=(r_ptr+1) % depth;
+end
+end
+assign full =(w_ptr+1==r_ptr);
+assign empty=(w_ptr==r_ptr);
+endmodule
+module fifo_8_tb;
+reg clk,rst;
+reg w_en, r_en;
+reg[7:0] data_in;
+wire[7:0] data_out;
+wire full,empty;
+fifo_8 #(depth(8), .data_width(8)) dut(
+.clk(clk),
+.rst(rst),
+.w_en(w_en),
+.r_en(r_en),
+.data_in(data_in),
+.data_out(data_out),
+.full(full),
+.empty(empty)
+);
+initial begin
+clk=1'b0;
+forever #5 clk= ~clk;
+end
+initial begin
+rst=1'b1;
+w_en=1'b0;
+r_en=1'b0;
+data_in=8'd0;
+#10 rst=1'bo;
+#10 w_en = 1'b1;
+data_in=8'd1;
+#10;
+w_en=1'b0;
+$disaply("Write 1,Full: %b, Empty: %b, full, empty);
+#10 w_en=1'b1;
+data_in=8'd2;
+#10;
+w_en=1'b0;
+$disaply("Write 2,Full: %b, Empty: %b, full, empty);
+#10 w_en=1'b1; data_in=8'd3; #10; w_en=1'b0;
+#10 w_en=1'b1; data_in=8'd4; #10; w_en=1'b0;
+#10 w_en=1'b1; data_in=8'd5; #10; w_en=1'b0;
+#10 w_en=1'b1; data_in=8'd6; #10; w_en=1'b0;
+#10 w_en=1'b1; data_in=8'd7; #10; w_en=1'b0;
+#10 w_en=1'b1; data_in=8'd8; #10; w_en=1'b0;
+$display("Write 3-8, Full: %b, Empty: %b, full, empty);
+#10 r_en=1'b1;
+#10;
+r_en=1'b0;
+$display("Read 1, Data: %d, Full: %b, Empty: %b, data_out, full,
+empty);
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+#10 r_en=1'b1; #10; r_en=1'b0;
+$display("Read 2-8, Full: %b, Empty: %b, full,empty);
+#10 w_en=1'b1;
+data_in=8'd9;
+#10;
+$display("Pverflow, Full: %b, Empty: %b, full, empty);
+#10 r_en=1'b1;
+#10;
+$display("Underflow, Full: %b, Empty: %b, full, empty);
+end
 endmodule
 
 Conclusion:
